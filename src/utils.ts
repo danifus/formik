@@ -1,4 +1,4 @@
-import cloneDeep from 'lodash/cloneDeep';
+import clone from 'lodash/clone';
 import toPath from 'lodash/toPath';
 import * as React from 'react';
 
@@ -32,11 +32,13 @@ export function setIn(obj: any, path: string, value: any): any {
     const currentPath: string = pathArray[i];
     let currentObj: any = getIn(obj, pathArray.slice(0, i + 1));
 
-    if (resVal[currentPath]) {
-      resVal = resVal[currentPath];
-    } else if (currentObj) {
-      resVal = resVal[currentPath] = cloneDeep(currentObj);
+    if (currentObj) {
+      // Clone (shallow) this level of the structure if it already exists so
+      // that we don't mutate the existing object in place.
+      resVal = resVal[currentPath] = clone(currentObj);
     } else {
+      // This level of the structure doesn't exist yet so infer the datatype
+      // and create it.
       const nextPath: string = pathArray[i + 1];
       resVal = resVal[currentPath] =
         isInteger(nextPath) && Number(nextPath) >= 0 ? [] : {};
